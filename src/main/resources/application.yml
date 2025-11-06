@@ -1,0 +1,63 @@
+tldr:
+  resource-url: classpath:/sample1.pdf
+  tessdata-path: /opt/homebrew/share/tessdata
+  tessdata-language: eng
+
+  prompt-template-off: |
+    You are a data extraction assistant.
+    
+    Extract the following fields from the given text:
+      - partNumber
+      - manufacturer
+    
+    The given text is an unstructured document that was obtained through ocr from a scanned jpeg document.
+    
+    The text contains a table. One column of that table is "P/N". The values in that column are
+    delimited by a colon ":". The part left of the colon is the part number. The part right from the colon in the manufacturer.
+    
+    Return the extracted data in JSON format according to the provided JSON schema. 
+    
+    If a field is missing, set its value to null.
+    Input text:
+      {{document}}
+
+  prompt-template: |
+    You are a data extraction assistant.
+    
+    With this request we send a json schema definition. The schema defines an array of objects. The objects in the array
+    have required fields.
+    
+    Try to extract the required fields from the given text.
+    
+    The given text is an unstructured document that was obtained through ocr from a scanned jpeg document.
+    
+    The value for serialNumber can be a UUID. 
+    
+    Return the extracted data in JSON format according to the provided JSON schema. 
+    
+    If a field is missing, set its value to null.
+    Input text:
+      {{document}}
+
+logging:
+  level:
+    org.springframework.ai: DEBUG
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  threads:
+    virtual:
+      enabled: true
+  application:
+    name: TL;DR - Tool for Linguistic Document Reading
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      organization-id: ${OPENAI_ORG_ID}
+      project-id: ${OPENAI_PROJECT_ID}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4.1-mini}
+          temperature: 1
+          reasoning-effort: ${OPENAI_MODEL_REASONING_EFFORT:minimal}

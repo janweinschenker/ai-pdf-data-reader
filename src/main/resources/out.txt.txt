@@ -1,0 +1,27 @@
+Part Number Serial Number Manufacturer
+
+4711 6u7688777 Airbus
+
+4711-b3 967808 ACME Aviation
+
+NCC-1701 555-8533 ACME Naval Yard
+
+9653496 f4d8a780-9f2f-40c4-b9a6- Boeing
+ba70983adbf1
+
+watat 1eea1867-4b27-429c-8827- | Roll
+90639dc17fae
+
+325443 1fcd7e8a-e050-4179-883e- | Rolls-Royce
+9004e31d4451
+
+434525 bcaflee4-c600-418a-95f9- Airbus
+db31b5448288
+
+1234 bc2d86bf-fb57-4c80-acb4- Rolls-Royce
+5795b0ed93fc
+
+12343 7def51f6-15fd-4193-ab69- Airbus
+
+28fab3775a22
+
