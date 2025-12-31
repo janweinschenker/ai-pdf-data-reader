@@ -1,7 +1,7 @@
 tldr:
   resource-url: classpath:/sample1.pdf
   tessdata-path: /opt/homebrew/share/tessdata
-  tessdata-language: eng
+  tessdata-language: deu
 
   prompt-template-off: |
     You are a data extraction assistant.
