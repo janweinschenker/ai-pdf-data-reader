@@ -1,7 +1,6 @@
-package de.holisticon.tldrdatareader.adapter.in.jpeg.reader;
+package de.holisticon.tldrdatareader.adapter.out.jpeg.reader;
 
-import de.holisticon.tldrdatareader.adapter.in.textextractor.TextExtractor;
-import de.holisticon.tldrdatareader.application.port.in.DataExtractionInPort;
+import de.holisticon.tldrdatareader.application.port.in.TextExtractor;
 import de.holisticon.tldrdatareader.infrastructure.ApplicationProperties;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +12,12 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class JpgInAdapter implements TextExtractor {
+public class JpgOutAdapter implements TextExtractor {
 
-    private final @NonNull DataExtractionInPort extractionInPort;
     private final @NonNull ApplicationProperties applicationProperties;
 
     @Override
@@ -51,9 +50,8 @@ public class JpgInAdapter implements TextExtractor {
             tesseract.setOcrEngineMode(3);
             tesseract.setPageSegMode(3);
 
-            final var s = tesseract.doOCR(bufferedImage);
-            final var parts = extractionInPort.extractDataFromDocuments(s);
-            return parts.orElse("");
+            final var s = Optional.ofNullable(tesseract.doOCR(bufferedImage));
+            return s.orElse("");
 
         } catch (TesseractException e) {
             throw new RuntimeException(e);

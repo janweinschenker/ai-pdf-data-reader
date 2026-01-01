@@ -1,4 +1,4 @@
-package de.holisticon.tldrdatareader.adapter.in.textextractor;
+package de.holisticon.tldrdatareader.application.port.in;
 
 public interface TextExtractor {
 

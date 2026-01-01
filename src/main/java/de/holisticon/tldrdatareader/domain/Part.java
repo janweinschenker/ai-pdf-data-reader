@@ -1,10 +1,14 @@
 package de.holisticon.tldrdatareader.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Part {
-    private final String partNumber;
-    private final String manufacturer;
-    private final String serialNumber;
+    private String partNumber;
+    private String manufacturer;
+    private String serialNumber;
 }

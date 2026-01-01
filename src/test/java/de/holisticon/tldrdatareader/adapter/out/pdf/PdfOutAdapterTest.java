@@ -1,4 +1,4 @@
-package de.holisticon.tldrdatareader.adapter.in.pdf;
+package de.holisticon.tldrdatareader.adapter.out.pdf;
 
 import de.holisticon.tldrdatareader.application.port.in.DataExtractionInPort;
 import de.holisticon.tldrdatareader.infrastructure.ApplicationProperties;
@@ -16,10 +16,10 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class PdfInAdapterTest {
+class PdfOutAdapterTest {
 
     @InjectMocks
-    private PdfInAdapter sut;
+    private PdfOutAdapter sut;
 
     @Mock
     private DataExtractionInPort dataExtractionInPort;

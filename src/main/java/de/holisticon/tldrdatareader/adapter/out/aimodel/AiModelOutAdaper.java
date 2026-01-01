@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AbstractMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.converter.BeanOutputConverter;
@@ -33,7 +35,7 @@ public class AiModelOutAdaper implements AiModelOutPort {
     private final @NonNull ApplicationProperties applicationProperties;
 
     @Override
-    public Optional<String> extractStructuredData(final String textFromJpeg) {
+    public Optional<PartList> extractStructuredData(final String textFromJpeg) {
         final var promptTemplate = applicationProperties.getPromptTemplate();
         final var preparedPrompt = promptTemplate.replace("{{document}}", textFromJpeg);
 
@@ -48,7 +50,8 @@ public class AiModelOutAdaper implements AiModelOutPort {
 
             return Optional.of(generation)
                     .map(Generation::getOutput)
-                    .map(AbstractMessage::getText);
+                    .map(AbstractMessage::getText)
+                    .map(partListBeanOutputConverter::convert);
         } catch (final NonTransientAiException e) {
             log.error("AiModelOutAdaper error calling chat model", e);
             return Optional.empty();
@@ -56,7 +59,7 @@ public class AiModelOutAdaper implements AiModelOutPort {
     }
 
     @Override
-    public Optional<String> extractStructuredData(final PdfContainer pdfContainer) {
+    public Optional<PartList> extractStructuredData(final PdfContainer pdfContainer) {
 
         final List<Document> docs = getDocumentList(pdfContainer);
 
@@ -74,7 +77,8 @@ public class AiModelOutAdaper implements AiModelOutPort {
 
             return Optional.of(chatResponse)
                     .map(Generation::getOutput)
-                    .map(AbstractMessage::getText);
+                    .map(AbstractMessage::getText)
+                    .map(partListBeanOutputConverter::convert);
         } catch (final NonTransientAiException e) {
             log.error("AiModelOutAdaper error calling chat model", e);
             return Optional.empty();
@@ -105,24 +109,30 @@ public class AiModelOutAdaper implements AiModelOutPort {
     }
 
     @Override
-    public Optional<String> extractStructuredData(String fileContent, String jsonSchema) {
+    public Optional<PartList> extractStructuredData(String fileContent, String jsonSchema) {
         final var promptTemplate = applicationProperties.getPromptTemplate();
         final var preparedPrompt = promptTemplate.replace("{{document}}", fileContent);
         log.info("AiModelOutAdaper prepared prompt {}", preparedPrompt);
 
         try {
-
             final OpenAiChatOptions options = OpenAiChatOptions.builder()
                     .responseFormat(ResponseFormat.builder()
                             .type(ResponseFormat.Type.JSON_SCHEMA)
                             .jsonSchema(jsonSchema)
                             .build())
                     .build();
-            final var chatResponse = chatModel.call(new Prompt(new UserMessage(preparedPrompt), options)).getResult();
+            final var chatResponse = chatModel.call(new Prompt(new UserMessage(preparedPrompt), options));
+            final var result = chatResponse.getResult();
+            final ChatResponseMetadata metadata = chatResponse.getMetadata();
+            final Usage usage = metadata.getUsage();
+            log.info("Prompt tokens: " + usage.getPromptTokens());
+            log.info("Completion tokens: " + usage.getCompletionTokens());
+            log.info("Total tokens: " + usage.getTotalTokens());
 
-            return Optional.of(chatResponse)
+            return Optional.of(result)
                     .map(Generation::getOutput)
-                    .map(AbstractMessage::getText);
+                    .map(AbstractMessage::getText)
+                    .map(partListBeanOutputConverter::convert);
         } catch (final NonTransientAiException e) {
             log.error("AiModelOutAdaper error calling chat model", e);
             return Optional.empty();

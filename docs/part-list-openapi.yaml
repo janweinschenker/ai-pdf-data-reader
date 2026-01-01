@@ -1,0 +1,60 @@
+openapi: 3.0.3
+info:
+  title: Part List Data Objects
+  description: OpenAPI schema definitions generated from src/main/resources/part-list-schema.json
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080
+    description: Local server
+components:
+  schemas:
+    Part:
+      type: object
+      properties:
+        partNumber:
+          type: string
+          description: The unique identifier of the part
+        manufacturer:
+          type: string
+          description: The name of the manufacturer
+        serialNumber:
+          type: string
+          description: The serial number of the part
+      required:
+        - partNumber
+        - manufacturer
+        - serialNumber
+      additionalProperties: false
+    PartList:
+      type: object
+      properties:
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+      required:
+        - parts
+      additionalProperties: false
+paths:
+  /parts:
+    get:
+      summary: Retrieve a part list
+      description: Returns a JSON object containing an array of parts that conform to the Part schema.
+      responses:
+        '200':
+          description: A PartList object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartList'
+              examples:
+                sample:
+                  value:
+                    parts:
+                      - partNumber: "PN-001"
+                        manufacturer: "ACME Corp"
+                        serialNumber: "SN-0001"
+                      - partNumber: "PN-002"
+                        manufacturer: "Contoso"
+                        serialNumber: "SN-0002"
+

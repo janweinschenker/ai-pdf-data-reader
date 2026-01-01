@@ -22,21 +22,9 @@ tldr:
       {{document}}
 
   prompt-template: |
-    You are a data extraction assistant.
+    Extract data. serialNumber can be a UUID. null missing values.
     
-    With this request we send a json schema definition. The schema defines an array of objects. The objects in the array
-    have required fields.
-    
-    Try to extract the required fields from the given text.
-    
-    The given text is an unstructured document that was obtained through ocr from a scanned jpeg document.
-    
-    The value for serialNumber can be a UUID. 
-    
-    Return the extracted data in JSON format according to the provided JSON schema. 
-    
-    If a field is missing, set its value to null.
-    Input text:
+    Input:
       {{document}}
 
 logging:
@@ -58,6 +46,11 @@ spring:
       project-id: ${OPENAI_PROJECT_ID}
       chat:
         options:
-          model: ${OPENAI_MODEL:gpt-4.1-mini}
-          temperature: 1
-          reasoning-effort: ${OPENAI_MODEL_REASONING_EFFORT:minimal}
+          model: gpt-4.1-mini
+          temperature: 0
+          top_p: 1
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics,prometheus

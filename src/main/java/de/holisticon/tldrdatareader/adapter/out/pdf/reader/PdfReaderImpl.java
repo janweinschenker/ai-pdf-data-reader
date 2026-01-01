@@ -1,4 +1,4 @@
-package de.holisticon.tldrdatareader.adapter.in.pdf.reader;
+package de.holisticon.tldrdatareader.adapter.out.pdf.reader;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;

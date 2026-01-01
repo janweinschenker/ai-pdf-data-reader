@@ -1,7 +1,6 @@
-package de.holisticon.tldrdatareader.adapter.in.pdf;
+package de.holisticon.tldrdatareader.adapter.out.pdf;
 
-import de.holisticon.tldrdatareader.adapter.in.textextractor.TextExtractor;
-import de.holisticon.tldrdatareader.application.port.in.DataExtractionInPort;
+import de.holisticon.tldrdatareader.application.port.in.TextExtractor;
 import de.holisticon.tldrdatareader.infrastructure.ApplicationProperties;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +18,15 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PdfInAdapter implements TextExtractor {
+public class PdfOutAdapter implements TextExtractor {
 
-    private final @NonNull DataExtractionInPort extractionInPort;
     private final @NonNull ApplicationProperties applicationProperties;
-
 
     @Override
     public boolean canHandle(String contentType) {
@@ -43,10 +41,7 @@ public class PdfInAdapter implements TextExtractor {
      */
     @Override
     public String extractText(byte[] fileContent) {
-
-
-        final var s = getTextContent(fileContent) + extractTextFromMedia(fileContent);
-        return s;
+        return getTextContent(fileContent) + extractTextFromMedia(fileContent);
     }
 
     private String getTextContent(final byte[] fileContent) {
@@ -76,8 +71,8 @@ public class PdfInAdapter implements TextExtractor {
             tesseract.setLanguage(applicationProperties.getTessdataLanguage());
 
             final var s = tesseract.doOCR(createImageFromBytes(imageData));
-            final var parts = extractionInPort.extractDataFromDocuments(s);
-            return parts.toString();
+            final var optional = Optional.ofNullable(s);
+            return optional.orElse("");
 
         } catch (TesseractException e) {
             throw new RuntimeException(e);

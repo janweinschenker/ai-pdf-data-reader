@@ -35,8 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                description: Object extracted from document matching provided schema
+                $ref: '#/components/schemas/PartList'
 components:
   schemas:
     DocumentUploadRequest:
@@ -51,4 +50,32 @@ components:
       required:
         - file
         - schema
+    Part:
+      type: object
+      properties:
+        partNumber:
+          type: string
+          description: The unique identifier of the part
+        manufacturer:
+          type: string
+          description: The name of the manufacturer
+        serialNumber:
+          type: string
+          description: The serial number of the part
+      required:
+        - partNumber
+        - manufacturer
+        - serialNumber
+      additionalProperties: false
+    PartList:
+      type: object
+      properties:
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+      required:
+        - parts
+      additionalProperties: false
+
 

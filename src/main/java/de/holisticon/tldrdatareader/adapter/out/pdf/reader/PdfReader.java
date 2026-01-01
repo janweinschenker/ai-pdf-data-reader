@@ -1,4 +1,4 @@
-package de.holisticon.tldrdatareader.adapter.in.pdf.reader;
+package de.holisticon.tldrdatareader.adapter.out.pdf.reader;
 
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 

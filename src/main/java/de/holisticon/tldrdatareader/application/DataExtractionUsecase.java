@@ -1,31 +1,56 @@
 package de.holisticon.tldrdatareader.application;
 
 import de.holisticon.tldrdatareader.application.port.in.DataExtractionInPort;
+import de.holisticon.tldrdatareader.application.port.in.TextExtractor;
 import de.holisticon.tldrdatareader.application.port.out.AiModelOutPort;
-import de.holisticon.tldrdatareader.domain.Part;
-import de.holisticon.tldrdatareader.domain.PdfContainer;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import de.holisticon.tldrdatareader.domain.PartList;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
+/**
+ * Use case for reading files and extracting structured data.
+ */
+
+@Component
 @Slf4j
 public class DataExtractionUsecase implements DataExtractionInPort {
 
-    private final @NonNull AiModelOutPort aiModelOutPort;
+    private final List<TextExtractor> textExtractorList;
+    private final AiModelOutPort aiModelOutPort;
 
-    @Override
-    public Optional<String> extractDataFromDocuments(final @NonNull PdfContainer pdfContainer) {
-        return aiModelOutPort.extractStructuredData(pdfContainer);
+    public DataExtractionUsecase(final List<TextExtractor> textExtractorList, final AiModelOutPort aiModelOutPort) {
+        this.textExtractorList = textExtractorList;
+        this.aiModelOutPort = aiModelOutPort;
     }
 
+    /**
+     * Extract structured data from file content based on the provided JSON schema.
+     *
+     * @param file        The file content as byte array
+     * @param contentType The content type of the file, e.g. application/pdf
+     * @param schema      The requestes json schema
+     * @return Optional containing the structured data as String if extraction was successful, otherwise an empty Optional
+     */
     @Override
-    public Optional<String> extractDataFromDocuments(final @NonNull String textFromJpeg) {
-        return aiModelOutPort.extractStructuredData(textFromJpeg);
+    public Optional<PartList> extractStructuredData(byte[] file, String contentType, String schema) {
+        return textExtractorList.stream()
+                .filter(it -> it.canHandle(contentType))
+                .findFirst()
+                .map(it -> it.extractText(file))
+                //.map(this::reduceWhitespace)
+                .flatMap(it -> aiModelOutPort.extractStructuredData(it, schema));
     }
+
+    String reduceWhitespace(String input) {
+        return input.lines()
+                .map(String::trim)
+                .filter(l -> !l.isBlank())
+                .filter(l -> !l.matches("Part Number.*Manufacturer"))
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
 }

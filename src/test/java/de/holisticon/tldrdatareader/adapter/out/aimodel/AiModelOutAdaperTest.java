@@ -9,9 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ai.chat.messages.AbstractMessage;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -52,7 +52,7 @@ class AiModelOutAdaperTest {
         when(chatModel.call(any(Prompt.class))).thenThrow(new NonTransientAiException("AI error"));
 
         // when
-        Optional<String> actualParts = sut.extractStructuredData(pdfContainer);
+        Optional<PartList> actualParts = sut.extractStructuredData(pdfContainer);
 
         // then
         assertTrue(actualParts.isEmpty());
@@ -116,7 +116,7 @@ class AiModelOutAdaperTest {
         when(outputMessage.getText()).thenReturn(expected);
 
         // when
-        final Optional<String> actual = sut.extractStructuredData(textFromJpeg);
+        final Optional<PartList> actual = sut.extractStructuredData(textFromJpeg);
 
         // then
         assertTrue(actual.isPresent());
@@ -138,7 +138,7 @@ class AiModelOutAdaperTest {
         when(chatModel.call(any(Prompt.class))).thenThrow(new NonTransientAiException("AI error"));
 
         // when
-        final Optional<String> actual = sut.extractStructuredData(textFromJpeg);
+        final Optional<PartList> actual = sut.extractStructuredData(textFromJpeg);
 
         // then
         assertTrue(actual.isEmpty());
@@ -175,7 +175,7 @@ class AiModelOutAdaperTest {
         doReturn(null).when(generation).getOutput();
 
         // when
-        final Optional<String> actual = sut.extractStructuredData(textFromJpeg);
+        final Optional<PartList> actual = sut.extractStructuredData(textFromJpeg);
 
         // then
         assertTrue(actual.isEmpty());
@@ -198,15 +198,23 @@ class AiModelOutAdaperTest {
         final ChatResponse chatResponse = mock(ChatResponse.class);
         final Generation generation = mock(Generation.class);
         final AssistantMessage outputMessage = mock(AssistantMessage.class);
+        final ChatResponseMetadata metadata = mock(ChatResponseMetadata.class);
+        final Usage usage = mock(Usage.class);
 
         when(applicationProperties.getPromptTemplate()).thenReturn(template);
         when(chatModel.call(any(Prompt.class))).thenReturn(chatResponse);
         when(chatResponse.getResult()).thenReturn(generation);
         doReturn(outputMessage).when(generation).getOutput();
         when(outputMessage.getText()).thenReturn(expected);
+        when(chatResponse.getMetadata()).thenReturn(metadata);
+        when(metadata.getUsage()).thenReturn(usage);
+        when(usage.getPromptTokens()).thenReturn(10);
+        when(usage.getCompletionTokens()).thenReturn(20);
+        when(usage.getTotalTokens()).thenReturn(30);
+
 
         // when
-        final Optional<String> actual = sut.extractStructuredData(fileContent, jsonSchema);
+        final Optional<PartList> actual = sut.extractStructuredData(fileContent, jsonSchema);
 
         // then
         assertTrue(actual.isPresent());
@@ -228,7 +236,7 @@ class AiModelOutAdaperTest {
         when(chatModel.call(any(Prompt.class))).thenThrow(new NonTransientAiException("AI error"));
 
         // when
-        final Optional<String> actual = sut.extractStructuredData(fileContent, jsonSchema);
+        final Optional<PartList> actual = sut.extractStructuredData(fileContent, jsonSchema);
 
         // then
         assertTrue(actual.isEmpty());
@@ -251,9 +259,17 @@ class AiModelOutAdaperTest {
         when(chatModel.call(any(Prompt.class))).thenReturn(chatResponse);
         when(chatResponse.getResult()).thenReturn(generation);
         doReturn(null).when(generation).getOutput();
+        final ChatResponseMetadata metadata = mock(ChatResponseMetadata.class);
+        final Usage usage = mock(Usage.class);
+
+        when(chatResponse.getMetadata()).thenReturn(metadata);
+        when(metadata.getUsage()).thenReturn(usage);
+        when(usage.getPromptTokens()).thenReturn(10);
+        when(usage.getCompletionTokens()).thenReturn(20);
+        when(usage.getTotalTokens()).thenReturn(30);
 
         // when
-        final Optional<String> actual = sut.extractStructuredData(fileContent, jsonSchema);
+        final Optional<PartList> actual = sut.extractStructuredData(fileContent, jsonSchema);
 
         // then
         assertTrue(actual.isEmpty());

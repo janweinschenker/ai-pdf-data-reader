@@ -1,6 +1,11 @@
 package de.holisticon.tldrdatareader.infrastructure.rest;
 
-import de.holisticon.tldrdatareader.application.ExtraktStructuredDataUseCase;
+import de.holisticon.tldrdatareader.application.port.in.DataExtractionInPort;
+import de.holisticon.tldrdatareader.domain.PartList;
+import de.holisticon.tldrdatareader.infrastructure.rest.mapper.PartListMapper;
+import de.holisticon.tldrdatareaderinfrastructure.rest.dto.PartListDto;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -13,22 +18,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @RestController
-public class DocumentController implements de.holisticon.tldrdatareader.infrastructure.rest.DocumentApiDelegate {
+public class DocumentController implements DocumentApiDelegate {
 
-    private final ExtraktStructuredDataUseCase extraktStructuredDataUseCase;
+    private final DataExtractionInPort dataExtractionInPort;
+    private final ObservationRegistry observationRegistry;
 
     @Override
     @SneakyThrows
-    public ResponseEntity<String> uploadDocument(MultipartFile file,
-                                                 String schema) {
+    public ResponseEntity<PartListDto> uploadDocument(MultipartFile file,
+                                                      String schema) {
         log.info("Received request for schema {}", schema);
+        final Optional<PartList> response = dataExtractionInPort.extractStructuredData(file.getBytes(), file.getContentType(), schema);
+        return Observation
+                .createNotStarted("ai.call", observationRegistry)
+                .observe(() -> createResponse(response));
 
-        Optional<String> response = extraktStructuredDataUseCase.extractStructuredData(file.getBytes(), file.getContentType(), schema);
+    }
 
-
+    private ResponseEntity<PartListDto> createResponse(final Optional<PartList> response) {
         return response
+                .map(PartListMapper.INSTANCE::toDto)
                 .map(it -> ResponseEntity.ok().body(it))
-                .orElse(ResponseEntity.badRequest().body("Could not extract structured data from file"));
-
+                .orElse(ResponseEntity.badRequest().body(null));
     }
 }
