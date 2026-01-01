@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
@@ -20,6 +21,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.retry.NonTransientAiException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,8 +37,8 @@ class AiModelOutAdaperTest {
 
     @Mock
     private OpenAiChatModel chatModel;
-    @Mock
-    private BeanOutputConverter<PartList> partListBeanOutputConverter;
+    @Spy
+    private BeanOutputConverter<PartList> partListBeanOutputConverter = new BeanOutputConverter<>(PartList.class);
     @Mock
     private ApplicationProperties applicationProperties;
 
@@ -100,6 +102,8 @@ class AiModelOutAdaperTest {
         final String template = "Template: {{document}}";
         final String textFromJpeg = "hello";
         final String expected = "{\"parts\": []}";
+        final var expectedPartListInstance = new PartList();
+        expectedPartListInstance.setParts(new ArrayList<>());
 
         final ChatResponse chatResponse = mock(ChatResponse.class);
         final Generation generation = mock(Generation.class);
@@ -120,11 +124,10 @@ class AiModelOutAdaperTest {
 
         // then
         assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertEquals(expectedPartListInstance, actual.get());
         verify(applicationProperties).getPromptTemplate();
         verify(chatModel).call(any(Prompt.class));
-        // ensure converter mock isn't unexpectedly used in this flow
-        verifyNoInteractions(partListBeanOutputConverter);
+        verify(partListBeanOutputConverter, times(1)).convert(any());
     }
 
     @Test
@@ -194,6 +197,8 @@ class AiModelOutAdaperTest {
         final String fileContent = "file content";
         final String jsonSchema = "{\"type\":\"object\"}";
         final String expected = "{\"parts\": []}";
+        final PartList expectedPartListInstance = new PartList();
+        expectedPartListInstance.setParts(new ArrayList<>());
 
         final ChatResponse chatResponse = mock(ChatResponse.class);
         final Generation generation = mock(Generation.class);
@@ -218,10 +223,10 @@ class AiModelOutAdaperTest {
 
         // then
         assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertEquals(expectedPartListInstance, actual.get());
         verify(applicationProperties).getPromptTemplate();
         verify(chatModel).call(any(Prompt.class));
-        verifyNoInteractions(partListBeanOutputConverter);
+        verify(partListBeanOutputConverter, times(1)).convert(any());
     }
 
     @Test
