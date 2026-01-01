@@ -2,10 +2,12 @@ package de.holisticon.tldrdatareader.adapter.out.jpeg.reader;
 
 import de.holisticon.tldrdatareader.application.port.in.TextExtractor;
 import de.holisticon.tldrdatareader.infrastructure.ApplicationProperties;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -16,24 +18,31 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@NullMarked
 public class JpgOutAdapter implements TextExtractor {
 
-    private final @NonNull ApplicationProperties applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     @Override
     public String extractText(byte[] fileContent) {
 
-        BufferedImage bufferedImage = createImageFromBytes(fileContent);
+        final BufferedImage bufferedImage = createImageFromBytes(fileContent);
+        if (bufferedImage == null) {
+            return "";
+        }
         return getTextContents(bufferedImage);
 
     }
 
-    private BufferedImage createImageFromBytes(byte[] imageData) {
+    @Nullable
+    BufferedImage createImageFromBytes(byte[] imageData) {
         ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
         try {
             return ImageIO.read(bais);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Error reading image data", e);
+            return null;
         }
     }
 
@@ -54,7 +63,7 @@ public class JpgOutAdapter implements TextExtractor {
             return s.orElse("");
 
         } catch (TesseractException e) {
-            throw new RuntimeException(e);
+            return "";
         }
     }
 }

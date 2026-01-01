@@ -47,7 +47,6 @@ class AiModelOutAdaperTest {
     void extractStructuredData_shouldReturnEmptyListWhenNonTransientAiExceptionOccurs() {
         // given
         PdfContainer pdfContainer = mock(PdfContainer.class);
-        List<Document> documents = List.of(mock(Document.class));
         String promptTemplate = "Template with {{document}}";
 
         when(applicationProperties.getPromptTemplate()).thenReturn(promptTemplate);

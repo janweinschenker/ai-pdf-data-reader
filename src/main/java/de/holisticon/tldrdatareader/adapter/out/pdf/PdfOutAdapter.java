@@ -2,12 +2,13 @@ package de.holisticon.tldrdatareader.adapter.out.pdf;
 
 import de.holisticon.tldrdatareader.application.port.in.TextExtractor;
 import de.holisticon.tldrdatareader.infrastructure.ApplicationProperties;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.ai.content.Media;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
@@ -18,15 +19,17 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@NullMarked
 public class PdfOutAdapter implements TextExtractor {
 
-    private final @NonNull ApplicationProperties applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     @Override
     public boolean canHandle(String contentType) {
@@ -53,15 +56,16 @@ public class PdfOutAdapter implements TextExtractor {
     }
 
     String extractTextFromMedia(byte[] fileContent) {
-        final var string = new PagePdfDocumentReader(new ByteArrayResource(fileContent))
+        return new PagePdfDocumentReader(new ByteArrayResource(fileContent))
                 .get()
                 .stream()
                 .map(Document::getMedia)
-                .filter(it -> it != null && it.getData() != null)
+                .filter(Objects::nonNull)
+                .filter(it -> it.getData() != null)
                 .map(Media::getDataAsByteArray)
                 .map(this::getTextContents)
-                .toString();
-        return StringUtils.trimToEmpty(string);
+                .collect(Collectors.joining())
+                .trim();
     }
 
     String getTextContents(byte[] imageData) {
@@ -74,17 +78,19 @@ public class PdfOutAdapter implements TextExtractor {
             final var optional = Optional.ofNullable(s);
             return optional.orElse("");
 
-        } catch (TesseractException e) {
-            throw new RuntimeException(e);
+        } catch (TesseractException tesseractException) {
+            log.error(tesseractException.getMessage(), tesseractException);
+            return "";
         }
     }
 
-    private BufferedImage createImageFromBytes(byte[] imageData) {
+    @Nullable
+    BufferedImage createImageFromBytes(byte[] imageData) {
         ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
         try {
             return ImageIO.read(bais);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
