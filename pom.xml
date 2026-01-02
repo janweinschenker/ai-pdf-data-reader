@@ -20,10 +20,9 @@
         <developer/>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git://github.com/janweinschenker/ai-pdf-data-reader.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/janweinschenker/ai-pdf-data-reader.git</developerConnection>
+        <url>https://github.com/janweinschenker/ai-pdf-data-reader</url>
     </scm>
     <properties>
         <java.version>25</java.version>
