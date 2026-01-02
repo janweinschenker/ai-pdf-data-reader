@@ -74,3 +74,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn -B release:prepare release:perform -Darguments="-Dmaven.deploy.skip=true"
+
+      - name: Bump develop to next SNAPSHOT
+        run: |
+          git checkout develop
+          git pull origin develop
+          git merge master --no-ff -m "Merge master after release v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          # Bump to next snapshot using Maven Versions Plugin
+          mvn versions:set -DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT
+          git commit -am "Bump develop to next snapshot"
+          git push origin develop
