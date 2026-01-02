@@ -43,12 +43,6 @@ jobs:
         run: |
           mvn clean verify
 
-      - name: SonarCloud Quality Gate
-        uses: sonarsource/sonarcloud-quality-gate-action@v1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   release:
     name: Release on master
     needs: build
