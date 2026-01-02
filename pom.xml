@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.weinschenker</groupId>
     <artifactId>ai-pdf-data-reader</artifactId>
-    <version>0.0.9-SNAPSHOT-SNAPSHOT</version>
+    <version>0.0.11-SNAPSHOT</version>
     <name>ai-data-reader</name>
     <description>Ai PDF and Image Data Reader</description>
     <url />
@@ -327,6 +327,11 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.20.1</version>
             </plugin>
         </plugins>
         <pluginManagement>
