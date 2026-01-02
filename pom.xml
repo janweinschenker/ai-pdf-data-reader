@@ -326,7 +326,6 @@
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <performRelease>false</performRelease><!-- do not deploy to repo -->
                 </configuration>
             </plugin>
         </plugins>
