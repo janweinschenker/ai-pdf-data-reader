@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.weinschenker</groupId>
     <artifactId>ai-pdf-data-reader</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.6</version>
     <name>ai-data-reader</name>
     <description>Ai PDF and Image Data Reader</description>
     <url />
@@ -22,7 +22,7 @@
         <connection>scm:git:https://github.com/janweinschenker/ai-pdf-data-reader.git</connection>
         <developerConnection>scm:git:https://github.com/janweinschenker/ai-pdf-data-reader.git</developerConnection>
         <url>https://github.com/janweinschenker/ai-pdf-data-reader</url>
-      <tag>HEAD</tag>
+      <tag>v0.0.6</tag>
   </scm>
     <properties>
         <java.version>25</java.version>
