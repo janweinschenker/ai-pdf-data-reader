@@ -3,7 +3,7 @@ package de.holisticon.tldrdatareader.infrastructure.rest;
 import de.holisticon.tldrdatareader.application.port.in.DataExtractionInPort;
 import de.holisticon.tldrdatareader.domain.PartList;
 import de.holisticon.tldrdatareader.infrastructure.rest.mapper.PartListMapper;
-import de.holisticon.tldrdatareaderinfrastructure.rest.dto.PartListDto;
+import de.holisticon.tldrdatareader.infrastructure.rest.dto.PartListDto;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;

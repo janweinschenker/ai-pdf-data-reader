@@ -1,7 +1,7 @@
 package de.holisticon.tldrdatareader.infrastructure.rest.mapper;
 
 import de.holisticon.tldrdatareader.domain.PartList;
-import de.holisticon.tldrdatareaderinfrastructure.rest.dto.PartListDto;
+import de.holisticon.tldrdatareader.infrastructure.rest.dto.PartListDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
