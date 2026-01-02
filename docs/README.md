@@ -1,6 +1,6 @@
-# TL;DR - Tool for Linguistic Document Reading
+# Ai PDF and Image Data Reader
 
-TL;DR is a tool designed to read and analyze documents, extracting key information and summarizing content for quick
+This is a tool designed to read and analyze documents, extracting key information and summarizing content for quick
 understanding.
 
 ## How to start and run the application

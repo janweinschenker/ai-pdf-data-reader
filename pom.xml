@@ -7,11 +7,11 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.0.0</version>
     </parent>
-    <groupId>de.holisticon</groupId>
+    <groupId>org.weinschenker</groupId>
     <artifactId>ai-pdf-data-reader</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ai-pdf-data-reader</name>
-    <description>TL;DR - Tool for Linguistic Document Reading</description>
+    <name>ai-data-reader</name>
+    <description>Ai PDF and Image Data Reader</description>
     <url/>
     <licenses>
         <license/>
@@ -208,7 +208,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <mainClass>de.holisticon.tldrdatareader.AiPdfDataReaderApplication</mainClass>
+                    <mainClass>org.weinschenker.tldrdatareader.AiPdfDataReaderApplication</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -219,10 +219,10 @@
                 <configuration>
                     <configOptions>
                         <useTags>true</useTags>
-                        <apiPackage>de.holisticon.tldrdatareader.infrastructure.rest</apiPackage>
-                        <modelPackage>de.holisticon.tldrdatareader.infrastructure.rest.dto
+                        <apiPackage>org.weinschenker.tldrdatareader.infrastructure.rest</apiPackage>
+                        <modelPackage>org.weinschenker.tldrdatareader.infrastructure.rest.dto
                         </modelPackage>
-                        <configPackage>de.holisticon.tldrdatareader.config.rest</configPackage>
+                        <configPackage>org.weinschenker.tldrdatareader.config.rest</configPackage>
                         <delegatePattern>true</delegatePattern>
                         <useJakartaEe>true</useJakartaEe>
                     </configOptions>
