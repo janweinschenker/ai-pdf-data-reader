@@ -73,9 +73,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B release:prepare -Darguments="-Dmaven.deploy.skip=true" \
-              -DscmCommentPrefix="[maven-release-plugin] " \
-              -DpushChanges=true
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          # Strip -SNAPSHOT if present
+          BASE_VERSION=${CURRENT_VERSION%-SNAPSHOT}
+          mvn versions:set -DnewVersion=${BASE_VERSION}
+          git tag 'v${BASE_VERSION}'
           git push origin master --follow-tags
 
       - name: Bump develop to next SNAPSHOT
@@ -83,6 +85,15 @@ jobs:
           git checkout develop
           git pull origin develop
           git merge master --no-ff -m "Merge master after release v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          # Increment patch version for develop
           CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          # Strip -SNAPSHOT if present
+          BASE_VERSION=${CURRENT_VERSION%-SNAPSHOT}
+          # Split into major.minor.patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+          PATCH=$((PATCH + 1))
+          NEXT_VERSION="$MAJOR.$MINOR.$PATCH-SNAPSHOT"
+          echo "Setting next develop version: $NEXT_VERSION"
+          mvn versions:set -DnewVersion=$NEXT_VERSION
           git commit -am "Bump develop to next snapshot $CURRENT_VERSION"
           git push origin develop
