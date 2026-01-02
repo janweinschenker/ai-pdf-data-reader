@@ -73,7 +73,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B release:prepare release:perform -Darguments="-Dmaven.deploy.skip=true"
+          mvn -B release:prepare -Darguments="-Dmaven.deploy.skip=true" \
+              -DscmCommentPrefix="[maven-release-plugin] " \
+              -DpushChanges=true
+          git push origin master --follow-tags
 
       - name: Bump develop to next SNAPSHOT
         run: |
