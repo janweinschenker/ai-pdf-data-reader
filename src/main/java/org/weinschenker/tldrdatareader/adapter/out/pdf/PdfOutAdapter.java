@@ -1,7 +1,5 @@
 package org.weinschenker.tldrdatareader.adapter.out.pdf;
 
-import org.weinschenker.tldrdatareader.application.port.in.TextExtractor;
-import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
@@ -13,7 +11,10 @@ import org.springframework.ai.content.Media;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.weinschenker.tldrdatareader.application.port.in.TextExtractor;
+import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -33,7 +34,7 @@ public class PdfOutAdapter implements TextExtractor {
 
     @Override
     public boolean canHandle(String contentType) {
-        return contentType.startsWith("application/pdf");
+        return contentType.startsWith(MediaType.APPLICATION_PDF_VALUE);
     }
 
     /**
@@ -70,17 +71,17 @@ public class PdfOutAdapter implements TextExtractor {
 
     String getTextContents(byte[] imageData) {
         try {
-            Tesseract tesseract = new Tesseract();
+            final Tesseract tesseract = new Tesseract();
             tesseract.setDatapath(applicationProperties.getTessdataPath()); // path to tessdata dir
             tesseract.setLanguage(applicationProperties.getTessdataLanguage());
 
-            final var s = tesseract.doOCR(createImageFromBytes(imageData));
-            final var optional = Optional.ofNullable(s);
-            return optional.orElse("");
+            final var textFromImageData = tesseract.doOCR(createImageFromBytes(imageData));
+            final var optional = Optional.ofNullable(textFromImageData);
+            return optional.orElse(StringUtils.EMPTY);
 
         } catch (TesseractException tesseractException) {
             log.error(tesseractException.getMessage(), tesseractException);
-            return "";
+            return StringUtils.EMPTY;
         }
     }
 

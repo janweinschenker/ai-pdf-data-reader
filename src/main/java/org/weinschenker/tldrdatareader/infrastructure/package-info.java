@@ -4,5 +4,7 @@
  * and other technical details that support the core application logic.
  */
 
+@NullMarked
 package org.weinschenker.tldrdatareader.infrastructure;
 
+import org.jspecify.annotations.NullMarked;

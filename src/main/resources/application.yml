@@ -2,34 +2,11 @@ tldr:
   resource-url: classpath:/sample1.pdf
   tessdata-path: /opt/homebrew/share/tessdata
   tessdata-language: deu
-
-  prompt-template-off: |
-    You are a data extraction assistant.
-    
-    Extract the following fields from the given text:
-      - partNumber
-      - manufacturer
-    
-    The given text is an unstructured document that was obtained through ocr from a scanned jpeg document.
-    
-    The text contains a table. One column of that table is "P/N". The values in that column are
-    delimited by a colon ":". The part left of the colon is the part number. The part right from the colon in the manufacturer.
-    
-    Return the extracted data in JSON format according to the provided JSON schema. 
-    
-    If a field is missing, set its value to null.
-    Input text:
-      {{document}}
-
   prompt-template: |
-    Extract data. serialNumber can be a UUID. null missing values.
+    Extract data. The table headers are "Part Number", "Serial Number" and "Manufacturer". "Serial Number" can be a UUID. If a line only contains one hexadecimal string and no other tokens, it is the final part of the serial number from the previous line. null missing values.
     
     Input:
       {{document}}
-
-logging:
-  level:
-    org.springframework.ai: DEBUG
 
 spring:
   config:
@@ -38,12 +15,14 @@ spring:
     virtual:
       enabled: true
   application:
-    name: TL;DR - Tool for Linguistic Document Reading
+    name: Ai PDF and Image Data Reader
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
       organization-id: ${OPENAI_ORG_ID}
       project-id: ${OPENAI_PROJECT_ID}
+
+      # chat options will be overridden by environment variables if set
       chat:
         options:
           model: gpt-4.1-mini
@@ -54,3 +33,7 @@ management:
     web:
       exposure:
         include: metrics,prometheus
+
+logging:
+  level:
+    org.springframework.ai: ERROR

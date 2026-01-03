@@ -1,9 +1,9 @@
-package org.weinschenker.tldrdatareader.infrastructure.rest.mapper;
+package org.weinschenker.tldrdatareader.adapter.in.rest.mapper;
 
-import org.weinschenker.tldrdatareader.domain.PartList;
-import org.weinschenker.tldrdatareader.infrastructure.rest.dto.PartListDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+import org.weinschenker.tldrdatareader.adapter.in.rest.dto.gen.PartListDto;
+import org.weinschenker.tldrdatareader.domain.PartList;
 
 @Mapper
 public interface PartListMapper {

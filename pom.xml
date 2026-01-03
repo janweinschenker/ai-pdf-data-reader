@@ -36,6 +36,17 @@
         <json-schema-validator.version>5.5.6</json-schema-validator.version>
         <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <sonar.exclusions>
+            **/domain/*,
+            **/domain/**/*,
+            **/mapper/*,
+            **/mapper/**/*,
+            **/type/*,
+            **/type/**/*,
+            **/document/*,
+            **/document/**/*,
+            **/gen/*
+        </sonar.exclusions>
     </properties>
     <dependencies>
         <dependency>
@@ -218,10 +229,10 @@
                 <configuration>
                     <configOptions>
                         <useTags>true</useTags>
-                        <apiPackage>org.weinschenker.tldrdatareader.infrastructure.rest</apiPackage>
-                        <modelPackage>org.weinschenker.tldrdatareader.infrastructure.rest.dto
+                        <apiPackage>org.weinschenker.tldrdatareader.adapter.in.rest.gen</apiPackage>
+                        <modelPackage>org.weinschenker.tldrdatareader.adapter.in.rest.dto.gen
                         </modelPackage>
-                        <configPackage>org.weinschenker.tldrdatareader.config.rest</configPackage>
+                        <configPackage>org.weinschenker.tldrdatareader.infrastructure.rest</configPackage>
                         <delegatePattern>true</delegatePattern>
                         <useJakartaEe>true</useJakartaEe>
                     </configOptions>
@@ -262,6 +273,23 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco-maven-plugin.version}</version>
+                <configuration>
+                    <append>true</append>
+                    <excludes>
+                        <exclude>org/openapitools/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/*Dto.*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/*DtoBuilder.*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/*Mapper.*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/*MapperImpl.*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/dto/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/entity/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/gen/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/mapper/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/**/type/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/config/**/*</exclude>
+                        <exclude>org/weinschenker/tldrdatareader/domain/**/*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
@@ -308,11 +336,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <excludes>
-                        <exclude>de/holisticon/tldrdatareader.infrastructure/rest/dto/**/*</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>

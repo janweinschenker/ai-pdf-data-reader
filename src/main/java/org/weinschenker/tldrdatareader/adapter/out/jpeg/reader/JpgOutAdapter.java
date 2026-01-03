@@ -1,14 +1,16 @@
 package org.weinschenker.tldrdatareader.adapter.out.jpeg.reader;
 
-import org.weinschenker.tldrdatareader.application.port.in.TextExtractor;
-import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.weinschenker.tldrdatareader.application.port.in.TextExtractor;
+import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -48,22 +50,23 @@ public class JpgOutAdapter implements TextExtractor {
 
     @Override
     public boolean canHandle(String contentType) {
-        return contentType.startsWith("image/jpeg");
+        return contentType.startsWith(MediaType.IMAGE_JPEG_VALUE);
     }
 
     public String getTextContents(BufferedImage bufferedImage) {
         try {
-            Tesseract tesseract = new Tesseract();
+            final Tesseract tesseract = new Tesseract();
             tesseract.setDatapath(applicationProperties.getTessdataPath()); // path to tessdata dir
             tesseract.setLanguage(applicationProperties.getTessdataLanguage());
             tesseract.setOcrEngineMode(3);
             tesseract.setPageSegMode(3);
 
             final var s = Optional.ofNullable(tesseract.doOCR(bufferedImage));
-            return s.orElse("");
+            return s.orElse(StringUtils.EMPTY);
 
-        } catch (TesseractException e) {
-            return "";
+        } catch (final TesseractException e) {
+            log.error("Error reading image data", e);
+            return StringUtils.EMPTY;
         }
     }
 }

@@ -1,12 +1,8 @@
 package org.weinschenker.tldrdatareader.adapter.out.aimodel;
 
-import org.weinschenker.tldrdatareader.application.port.out.AiModelOutPort;
-import org.weinschenker.tldrdatareader.domain.PartList;
-import org.weinschenker.tldrdatareader.domain.PdfContainer;
-import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.ai.chat.messages.AbstractMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
@@ -20,6 +16,10 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.stereotype.Service;
+import org.weinschenker.tldrdatareader.application.port.out.AiModelOutPort;
+import org.weinschenker.tldrdatareader.domain.PartList;
+import org.weinschenker.tldrdatareader.domain.PdfContainer;
+import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +28,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @Service
+@NullMarked
 public class AiModelOutAdaper implements AiModelOutPort {
 
-    private final @NonNull OpenAiChatModel chatModel;
-    private final @NonNull BeanOutputConverter<PartList> partListBeanOutputConverter;
-    private final @NonNull ApplicationProperties applicationProperties;
+    private final OpenAiChatModel chatModel;
+    private final BeanOutputConverter<PartList> partListBeanOutputConverter;
+    private final ApplicationProperties applicationProperties;
 
     @Override
     public Optional<PartList> extractStructuredData(final String textFromJpeg) {

@@ -1,23 +1,26 @@
-package org.weinschenker.tldrdatareader.infrastructure.rest;
+package org.weinschenker.tldrdatareader.adapter.in.rest;
 
-import org.weinschenker.tldrdatareader.application.port.in.DataExtractionInPort;
-import org.weinschenker.tldrdatareader.domain.PartList;
-import org.weinschenker.tldrdatareader.infrastructure.rest.mapper.PartListMapper;
-import org.weinschenker.tldrdatareader.infrastructure.rest.dto.PartListDto;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.weinschenker.tldrdatareader.adapter.in.rest.dto.gen.PartListDto;
+import org.weinschenker.tldrdatareader.adapter.in.rest.gen.DocumentApiDelegate;
+import org.weinschenker.tldrdatareader.adapter.in.rest.mapper.PartListMapper;
+import org.weinschenker.tldrdatareader.application.port.in.DataExtractionInPort;
+import org.weinschenker.tldrdatareader.domain.PartList;
 
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
 @RestController
+@NullMarked
 public class DocumentController implements DocumentApiDelegate {
 
     private final DataExtractionInPort dataExtractionInPort;
@@ -25,8 +28,8 @@ public class DocumentController implements DocumentApiDelegate {
 
     @Override
     @SneakyThrows
-    public ResponseEntity<PartListDto> uploadDocument(MultipartFile file,
-                                                      String schema) {
+    public ResponseEntity<PartListDto> uploadDocument(final MultipartFile file,
+                                                      final String schema) {
         log.info("Received request for schema {}", schema);
         final Optional<PartList> response = dataExtractionInPort.extractStructuredData(file.getBytes(), file.getContentType(), schema);
         return Observation
