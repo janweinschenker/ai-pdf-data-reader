@@ -1,5 +1,7 @@
 package org.weinschenker.tldrdatareader.adapter.out.pdf;
 
+import net.sourceforge.tess4j.Tesseract;
+import org.mockito.MockedConstruction;
 import org.weinschenker.tldrdatareader.application.port.in.DataExtractionInPort;
 import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 import org.junit.jupiter.api.DisplayName;
@@ -9,11 +11,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PdfOutAdapterTest {
@@ -58,6 +65,37 @@ class PdfOutAdapterTest {
         // result should not be null or empty
         assertNotNull(result);
         assertFalse(result.isBlank(), "extracted text should not be blank");
+    }
+
+    @DisplayName("extractText: shouldReturnTextWhenValidImagePdfProvided")
+    @Test
+    void extractText_shouldReturnTextWhenValidImagePdfProvided() throws IOException {
+        // given
+        // load sample pdf from test resources
+        final var is = Thread.currentThread().getContextClassLoader().getResourceAsStream("pdf/sample2.pdf");
+        assertNotNull(is, "Test resource 'pdf/sample2.pdf' must be present");
+        final byte[] pdfBytes = toByteArray(is);
+        when(applicationProperties.getTessdataPath()).thenReturn("/tmp/tessdata");
+        when(applicationProperties.getTessdataLanguage()).thenReturn("eng");
+
+        // when // then
+        try (MockedConstruction<Tesseract> mocked = mockConstruction(Tesseract.class,
+                (mock, context) -> {
+                    when(mock.doOCR(any(BufferedImage.class))).thenReturn("recognized text");
+                })) {
+            // when
+            final String result = sut.extractText(pdfBytes);
+
+            // then
+            assertEquals("recognized text", result);
+            List<Tesseract> constructed = mocked.constructed();
+            assertEquals(1, constructed.size());
+            Tesseract used = constructed.getFirst();
+            verify(used).setDatapath("/tmp/tessdata");
+            verify(used).setLanguage("eng");
+            verify(used).setOcrEngineMode(3);
+            verify(used).setPageSegMode(3);
+        }
     }
 
     @DisplayName("extractText: shouldThrowWhenInputIsNull")

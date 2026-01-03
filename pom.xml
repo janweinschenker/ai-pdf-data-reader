@@ -47,6 +47,7 @@
             **/document/**/*,
             **/gen/*
         </sonar.exclusions>
+        <pdfbox.version>3.0.6</pdfbox.version>
     </properties>
     <dependencies>
         <dependency>
@@ -69,6 +70,11 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-tika-document-reader</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>

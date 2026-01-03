@@ -5,9 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.springframework.ai.content.Media;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,11 +20,10 @@ import org.springframework.stereotype.Service;
 import org.weinschenker.tldrdatareader.application.port.in.TextExtractor;
 import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -57,41 +60,48 @@ public class PdfOutAdapter implements TextExtractor {
     }
 
     String extractTextFromMedia(byte[] fileContent) {
-        return new PagePdfDocumentReader(new ByteArrayResource(fileContent))
-                .get()
+        return extractImagesFromPdf(fileContent)
                 .stream()
-                .map(Document::getMedia)
-                .filter(Objects::nonNull)
                 .filter(it -> it.getData() != null)
-                .map(Media::getDataAsByteArray)
                 .map(this::getTextContents)
                 .collect(Collectors.joining())
                 .trim();
     }
 
-    String getTextContents(byte[] imageData) {
+    List<BufferedImage> extractImagesFromPdf(byte[] fileContent) {
+        final List<BufferedImage> images = new ArrayList<>();
+        try (PDDocument document = Loader.loadPDF(fileContent)) {
+            for (PDPage page : document.getPages()) {
+                PDResources resources = page.getResources();
+                for (COSName xObjectName : resources.getXObjectNames()) {
+                    var xObject = resources.getXObject(xObjectName);
+                    if (xObject instanceof PDImageXObject imageXObject) {
+                        BufferedImage image = imageXObject.getImage();
+                        images.add(image);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error extracting images from PDF", e);
+        }
+
+        return images;
+    }
+
+    public String getTextContents(BufferedImage bufferedImage) {
         try {
             final Tesseract tesseract = new Tesseract();
             tesseract.setDatapath(applicationProperties.getTessdataPath()); // path to tessdata dir
             tesseract.setLanguage(applicationProperties.getTessdataLanguage());
+            tesseract.setOcrEngineMode(3);
+            tesseract.setPageSegMode(3);
 
-            final var textFromImageData = tesseract.doOCR(createImageFromBytes(imageData));
-            final var optional = Optional.ofNullable(textFromImageData);
-            return optional.orElse(StringUtils.EMPTY);
+            final var s = Optional.ofNullable(tesseract.doOCR(bufferedImage));
+            return s.orElse(StringUtils.EMPTY);
 
-        } catch (TesseractException tesseractException) {
-            log.error(tesseractException.getMessage(), tesseractException);
+        } catch (final TesseractException e) {
+            log.error("Error reading image data", e);
             return StringUtils.EMPTY;
-        }
-    }
-
-    @Nullable
-    BufferedImage createImageFromBytes(byte[] imageData) {
-        ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
-        try {
-            return ImageIO.read(bais);
-        } catch (IOException e) {
-            return null;
         }
     }
 
