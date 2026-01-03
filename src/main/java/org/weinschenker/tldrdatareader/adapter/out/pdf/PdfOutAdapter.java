@@ -2,8 +2,6 @@ package org.weinschenker.tldrdatareader.adapter.out.pdf;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
@@ -19,12 +17,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.weinschenker.tldrdatareader.application.port.in.TextExtractor;
 import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
+import org.weinschenker.tldrdatareader.infrastructure.TesseractOcr;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,40 +68,25 @@ public class PdfOutAdapter implements TextExtractor {
 
     List<BufferedImage> extractImagesFromPdf(byte[] fileContent) {
         final List<BufferedImage> images = new ArrayList<>();
-        try (PDDocument document = Loader.loadPDF(fileContent)) {
-            for (PDPage page : document.getPages()) {
-                PDResources resources = page.getResources();
-                for (COSName xObjectName : resources.getXObjectNames()) {
+        try (final PDDocument document = Loader.loadPDF(fileContent)) {
+            for (final PDPage page : document.getPages()) {
+                final PDResources resources = page.getResources();
+                for (final COSName xObjectName : resources.getXObjectNames()) {
                     var xObject = resources.getXObject(xObjectName);
                     if (xObject instanceof PDImageXObject imageXObject) {
-                        BufferedImage image = imageXObject.getImage();
+                        final BufferedImage image = imageXObject.getImage();
                         images.add(image);
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Error extracting images from PDF", e);
         }
-
         return images;
     }
 
-    public String getTextContents(BufferedImage bufferedImage) {
-        try {
-            final Tesseract tesseract = new Tesseract();
-            tesseract.setDatapath(applicationProperties.getTessdataPath()); // path to tessdata dir
-            tesseract.setLanguage(applicationProperties.getTessdataLanguage());
-            tesseract.setOcrEngineMode(3);
-            tesseract.setPageSegMode(3);
-
-            final var s = Optional.ofNullable(tesseract.doOCR(bufferedImage));
-            return s.orElse(StringUtils.EMPTY);
-
-        } catch (final TesseractException e) {
-            log.error("Error reading image data", e);
-            return StringUtils.EMPTY;
-        }
+    String getTextContents(final BufferedImage bufferedImage) {
+        return TesseractOcr.getTextContents(bufferedImage, applicationProperties.getTessdataPath(), applicationProperties.getTessdataLanguage());
     }
-
 
 }
