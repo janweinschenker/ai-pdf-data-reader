@@ -45,7 +45,7 @@ class JpgOutAdapterTest {
 
     @Test
     @DisplayName("getTextContents: should return OCR result when Tesseract succeeds")
-    void getTextContents_shouldReturnOcrResult_whenTesseractSucceeds() throws Exception {
+    void getTextContents_shouldReturnOcrResult_whenTesseractSucceeds() {
         // given
         when(props.getTessdataPath()).thenReturn("/tmp/tessdata");
         when(props.getTessdataLanguage()).thenReturn("eng");
@@ -74,7 +74,7 @@ class JpgOutAdapterTest {
 
     @Test
     @DisplayName("getTextContents: should return empty string when Tesseract throws")
-    void getTextContents_shouldReturnEmptyWhenTesseractThrows() throws Exception {
+    void getTextContents_shouldReturnEmptyWhenTesseractThrows() {
         // given
         when(props.getTessdataPath()).thenReturn("/tmp/tessdata");
         when(props.getTessdataLanguage()).thenReturn("eng");
@@ -82,15 +82,17 @@ class JpgOutAdapterTest {
         final BufferedImage img = new BufferedImage(5, 5, BufferedImage.TYPE_INT_RGB);
 
         // when // then
-        try (MockedConstruction<Tesseract> mocked = mockConstruction(Tesseract.class,
+        try (final MockedConstruction<Tesseract> mocked = mockConstruction(Tesseract.class,
                 (mock, context) -> {
                     when(mock.doOCR(any(BufferedImage.class))).thenThrow(new TesseractException("fail"));
                 })) {
             // when
             final String result = sut.getTextContents(img);
+            final var constructed = mocked.constructed();
 
             // then
             assertEquals("", result);
+            assertEquals(1, constructed.size());
         }
     }
 
