@@ -8,7 +8,5 @@ import java.util.Optional;
 public interface AiModelOutPort {
     Optional<PartList> extractStructuredData(String textFromJpeg);
 
-    Optional<PartList> extractStructuredData(PdfContainer pdfContainer);
-
     Optional<PartList> extractStructuredData(String fileContent, String jsonSchema);
 }

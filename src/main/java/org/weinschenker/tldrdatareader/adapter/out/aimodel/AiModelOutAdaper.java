@@ -10,7 +10,6 @@ import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.ResponseFormat;
@@ -18,11 +17,8 @@ import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.stereotype.Service;
 import org.weinschenker.tldrdatareader.application.port.out.AiModelOutPort;
 import org.weinschenker.tldrdatareader.domain.PartList;
-import org.weinschenker.tldrdatareader.domain.PdfContainer;
 import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -56,56 +52,6 @@ public class AiModelOutAdaper implements AiModelOutPort {
         } catch (final NonTransientAiException e) {
             log.error("AiModelOutAdaper error calling chat model", e);
             return Optional.empty();
-        }
-    }
-
-    @Override
-    public Optional<PartList> extractStructuredData(final PdfContainer pdfContainer) {
-
-        final List<Document> docs = getDocumentList(pdfContainer);
-
-        final var promptTemplate = applicationProperties.getPromptTemplate();
-        final var combined = new StringBuilder();
-
-        docs.forEach(d -> combined.append(d.getFormattedContent()).append("\n"));
-
-        final var preparedPrompt = promptTemplate.replace("{{document}}", combined.toString());
-
-        log.info("AiModelOutAdaper prepared prompt {}", preparedPrompt);
-
-        try {
-            final var chatResponse = chatModel.call(new Prompt(new UserMessage(preparedPrompt))).getResult();
-
-            return Optional.of(chatResponse)
-                    .map(Generation::getOutput)
-                    .map(AbstractMessage::getText)
-                    .map(partListBeanOutputConverter::convert);
-        } catch (final NonTransientAiException e) {
-            log.error("AiModelOutAdaper error calling chat model", e);
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Extracts a list of Document objects from the given PdfContainer.
-     *
-     * @param pdfContainer the PdfContainer containing the document list
-     * @return the list of Document objects, or an empty list if the document list is not valid
-     */
-    List<Document> getDocumentList(final PdfContainer pdfContainer) {
-        List<Document> result = new ArrayList<>();
-        if (pdfContainer.getDocumentList() instanceof List<?> rawList) {
-            for (Object item : rawList) {
-                if (item instanceof Document doc) {
-                    result.add(doc);
-                } else {
-                    log.warn("AiModelOutAdaper encountered non-Document item in document list: {}", item);
-                }
-            }
-            return result;
-        } else {
-            log.warn("AiModelOutAdaper document list is not a List, returning empty list");
-            return List.of();
         }
     }
 

@@ -1,8 +1,5 @@
 package org.weinschenker.tldrdatareader.adapter.out.aimodel;
 
-import org.weinschenker.tldrdatareader.domain.PartList;
-import org.weinschenker.tldrdatareader.domain.PdfContainer;
-import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +14,12 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.retry.NonTransientAiException;
+import org.weinschenker.tldrdatareader.domain.PartList;
+import org.weinschenker.tldrdatareader.infrastructure.ApplicationProperties;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,57 +39,6 @@ class AiModelOutAdaperTest {
     @Mock
     private ApplicationProperties applicationProperties;
 
-    @Test
-    @DisplayName("extractStructuredData: shouldReturnEmptyListWhenNonTransientAiExceptionOccurs")
-    void extractStructuredData_shouldReturnEmptyListWhenNonTransientAiExceptionOccurs() {
-        // given
-        PdfContainer pdfContainer = mock(PdfContainer.class);
-        String promptTemplate = "Template with {{document}}";
-
-        when(applicationProperties.getPromptTemplate()).thenReturn(promptTemplate);
-        when(chatModel.call(any(Prompt.class))).thenThrow(new NonTransientAiException("AI error"));
-
-        // when
-        Optional<PartList> actualParts = sut.extractStructuredData(pdfContainer);
-
-        // then
-        assertTrue(actualParts.isEmpty());
-        verify(chatModel).call(any(Prompt.class));
-    }
-
-    @Test
-    @DisplayName("getDocumentList: shouldReturnDocumentListWhenValidPdfContainerProvided")
-    void getDocumentList_shouldReturnDocumentListWhenValidPdfContainerProvided() {
-        // given
-        final PdfContainer pdfContainer = mock(PdfContainer.class);
-        final Document document = mock(Document.class);
-        final List<Object> rawList = List.of(document);
-
-        when(pdfContainer.getDocumentList()).thenReturn(rawList);
-
-        // when
-        final List<Document> actualDocuments = sut.getDocumentList(pdfContainer);
-
-        // then
-        assertEquals(1, actualDocuments.size());
-        assertEquals(document, actualDocuments.getFirst());
-    }
-
-    @Test
-    @DisplayName("getDocumentList: shouldReturnEmptyListWhenInvalidPdfContainerProvided")
-    void getDocumentList_shouldReturnEmptyListWhenInvalidPdfContainerProvided() {
-        // given
-        final PdfContainer pdfContainer = mock(PdfContainer.class);
-        final List<Object> rawList = List.of("Invalid item");
-
-        when(pdfContainer.getDocumentList()).thenReturn(rawList);
-
-        // when
-        final List<Document> actualDocuments = sut.getDocumentList(pdfContainer);
-
-        // then
-        assertTrue(actualDocuments.isEmpty());
-    }
 
     @Test
     @DisplayName("extractStructuredData(String): shouldReturnTextWhenChatModelReturnsGeneration")
