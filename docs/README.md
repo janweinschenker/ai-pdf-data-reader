@@ -31,7 +31,12 @@ Install tesseract and leptonica if you want to use OCR for image-based PDFs.
 ```bash
 $ brew install tesseract
 $ brew install leptonica
+$ brew install tesseract-lang
 ```
+
+you need a local version of tesseract installed and available in your system path that is compatible with the tess4j library used by the application.
+
+For example tess4j version 5.17.0 requires tesseract version 5.5.2 or higher.
 
 
 ## What happens under the hood
